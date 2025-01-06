@@ -2,37 +2,50 @@ package com.pong;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class Panel extends JPanel {
-    // Player Left && Player Right
-    public Player PL = new Player();
-    public Player PR = new Player(865, 270);
-    public Ball BALL = new Ball();
     boolean W = false, S = false, Up = false, Do = false;
+    // Player Left && Player Right
+    public Player PL = new Player(0, 270, 20, 150);
+    public Player PR = new Player(865, 270, 20, 150);
+    public Player WALL_L = new Player(0, 1, 8, 700);
+    public Player WALL_R = new Player(883, 1, 8, 700);
+    public Ball BALL = new Ball();
+    public int SL = 0, SR = 0;
+    public JLabel scoreR = new JLabel("SCORE P2: " + SR);
+    public JLabel scoreL = new JLabel("SCORE P1: " + SL);
     int SPEED = 30;
 
     // Entradas de teclado
     public Panel() {
-        repaint();
+        setLayout(null);
+        scoreL.setBounds(150, 10, 200, 15);
+        scoreR.setBounds(600, 10, 200, 15);
+        scoreL.setForeground(Color.WHITE);
+        scoreR.setForeground(Color.WHITE);
+
+        add(scoreL);
+        add(scoreR);
+
         setBackground(Color.BLACK);
-        addKeyListener(new KeyAdapter() {
+        addKeyListener(new KeyListener() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getExtendedKeyCode() == KeyEvent.VK_W) {
+                if (e.getKeyCode() == KeyEvent.VK_W) {
                     W = true;
                 }
-                if (e.getExtendedKeyCode() == KeyEvent.VK_S) {
+                if (e.getKeyCode() == KeyEvent.VK_S) {
                     S = true;
                 }
-                if (e.getExtendedKeyCode() == KeyEvent.VK_UP) {
+                if (e.getKeyCode() == KeyEvent.VK_UP) {
                     Up = true;
                 }
-                if (e.getExtendedKeyCode() == KeyEvent.VK_DOWN) {
+                if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                     Do = true;
                 }
             }
@@ -52,15 +65,19 @@ public class Panel extends JPanel {
                     Do = false;
                 }
             }
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
         });
 
-        this.setFocusable(true);
+        setFocusable(true);
         new Thread(() -> {
             while (true) {
                 updateMoves();
                 repaint();
                 try {
-                    Thread.sleep(15);
+                    Thread.sleep(18);
                 } catch (InterruptedException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -69,30 +86,47 @@ public class Panel extends JPanel {
         }).start();
     }
 
-    public void updateMoves() {
-        if (W && PL.y != 0) {
-            PL.y -= SPEED;
-        }
-        if (S && PL.y != 510) {
-            PL.y += SPEED;
-        }
-        if (Up && PR.y != 0) {
-            PR.y -= SPEED;
-            System.out.println(PR.y);
-        }
-        if (Do && PR.y != 510) {
-            PR.y += SPEED;
-            System.out.println(PR.y);
-        }
+    private int calculateBounceAngle(Player player, Ball ball) {
+        int playerCenter = player.y + player.height / 2;
+        int ballCenter = ball.y + ball.height / 2;
+        return (ballCenter - playerCenter) / 5; // Ajusta el divisor según lo necesites
     }
 
-    // dibujando graficos
+    public void updateMoves() {
+        PL.move(PL, W, S, SPEED);
+        PR.move(PR, Up, Do, SPEED);
+        if (PL.intersects(BALL)) {
+            BALL.dx = Math.abs(BALL.dx);
+            BALL.dy += calculateBounceAngle(PL, BALL);
+        }
+        if (PR.intersects(BALL)) {
+            BALL.dx = -Math.abs(BALL.dx);
+            BALL.dy += calculateBounceAngle(PR, BALL);
+        }
+        if (WALL_L.intersects(BALL)) {
+            BALL.x = 442;
+            BALL.y = 331;
+            BALL.dx = 3;
+            BALL.dy = -3;
+            SR++;
+        }
+        if (WALL_R.intersects(BALL)) {
+            BALL.x = 442;
+            BALL.y = 331;
+            BALL.dx = 3;
+            BALL.dy = -3;
+            SL++;
+        }
+        scoreL.setText("SCORE P1: " + SL);
+        scoreR.setText("SCORE P2: " + SR);
+        BALL.move(getWidth(), getHeight());
+    }
+
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        PL.draw(g);
         BALL.draw(g);
+        PL.draw(g);
         PR.draw(g);
-        repaint();
     }
 }

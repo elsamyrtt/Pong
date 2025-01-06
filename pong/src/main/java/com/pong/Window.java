@@ -3,7 +3,6 @@ package com.pong;
 import javax.swing.JFrame;
 
 public class Window extends JFrame {
-    // iniciamos el Panel
     Panel PANEL = new Panel();
 
     public Window() {
