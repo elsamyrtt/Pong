@@ -22,7 +22,10 @@ public class Panel extends JPanel {
     int SPEED = 30;
 
     // Entradas de teclado
+
     public Panel() {
+        setFocusTraversalKeysEnabled(false);
+        requestFocusInWindow();
         setLayout(null);
         scoreL.setBounds(150, 10, 200, 15);
         scoreR.setBounds(600, 10, 200, 15);
@@ -70,14 +73,13 @@ public class Panel extends JPanel {
             public void keyTyped(KeyEvent e) {
             }
         });
-
         setFocusable(true);
         new Thread(() -> {
             while (true) {
                 updateMoves();
                 repaint();
                 try {
-                    Thread.sleep(18);
+                    Thread.sleep(10);
                 } catch (InterruptedException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();

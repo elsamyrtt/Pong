@@ -11,8 +11,8 @@ public class Window extends JFrame {
         setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
         add(PANEL);
+        setVisible(true);
     }
 
 }
